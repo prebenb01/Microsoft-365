@@ -19,7 +19,7 @@
 
 # ============================ CONFIG ============================
 $SiteUrls = @(
-    "https://<domain>.sharepoint.com/sites/Felles"
+    "https://<domain>.sharepoint.com/sites/<site>"
 )
 $ClientId      = "######"           # Entra app reg used for PnP
 $Tenant        = "######"           # domain name

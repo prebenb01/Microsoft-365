@@ -31,7 +31,7 @@ $AdminUrl     = "https://<domain>-admin.sharepoint.com/"
 
 # ── Target Sites ─────────────────────────────────────────────────────────────
 $TargetSites = @(
-    "https://<domain>.sharepoint.com/sites/Arkiv"
+    "https://<domain>.sharepoint.com/sites/<site>"
 )
 
 # ── Validate ──────────────────────────────────────────────────────────────────
