@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page title</title>
+<!--
+    SharePoint HTML page template
+
+    Built for SharePoint "HTML pages" (Site Pages library), which render the file
+    in a sandboxed iframe. Rules this template follows:
+      - Single self-contained file: all CSS and JS inline (external CDN scripts are blocked)
+      - No fetch / API calls, no localStorage (both blocked by the sandbox)
+      - No web fonts: uses the Segoe UI system stack SharePoint itself uses
+      - In-page navigation via #anchor links (supported, doesn't affect SharePoint nav)
+      - Links to other domains must be allowed by a site admin under
+        Site settings > HTML Field Security
+      - Uploaded HTML does NOT inherit the site theme: set your brand colours below
+      - Max 10 MB per HTML file; host large images in Site Assets and link them
+
+    Upload: Site Pages > Create or upload > Upload HTML page
+-->
+<style>
+    /* ===================== BRAND: edit these ===================== */
+    :root {
+        --brand:        #0f6cbd;   /* primary colour (buttons, links, accents) */
+        --brand-dark:   #0c3b5e;   /* hero background */
+        --brand-light:  #ebf3fc;   /* tinted backgrounds */
+        --text:         #242424;
+        --text-muted:   #616161;
+        --bg:           #ffffff;
+        --bg-alt:       #f5f5f5;
+        --border:       #e0e0e0;
+        --radius:       8px;
+        --max-width:    1100px;
+        --font: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+    }
+    /* ============================================================== */
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+        margin: 0;
+        font-family: var(--font);
+        font-size: 16px;
+        line-height: 1.6;
+        color: var(--text);
+        background: var(--bg);
+    }
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: var(--brand); }
+    a:focus-visible, button:focus-visible, summary:focus-visible {
+        outline: 2px solid var(--brand);
+        outline-offset: 2px;
+    }
+    h1, h2, h3 { line-height: 1.25; margin: 0 0 .5em; }
+    h2 { font-size: 1.6rem; }
+    h3 { font-size: 1.15rem; }
+    p  { margin: 0 0 1em; }
+
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+    section { padding: 56px 0; scroll-margin-top: 64px; }
+    section.alt { background: var(--bg-alt); }
+    .lead { font-size: 1.15rem; color: var(--text-muted); max-width: 70ch; }
+
+    /* ---------- Hero ---------- */
+    .hero {
+        background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+        color: #fff;
+        padding: 72px 0 64px;
+    }
+    .hero h1 { font-size: clamp(2rem, 4vw, 2.75rem); }
+    .hero p  { font-size: 1.15rem; max-width: 60ch; opacity: .92; }
+    .eyebrow {
+        display: inline-block;
+        font-size: .8rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+        background: rgba(255,255,255,.15); padding: 4px 10px; border-radius: 999px; margin-bottom: 16px;
+    }
+    .btn {
+        display: inline-block; padding: 10px 20px; border-radius: var(--radius);
+        font-weight: 600; text-decoration: none; margin: 8px 8px 0 0;
+        background: #fff; color: var(--brand-dark); border: 2px solid #fff;
+    }
+    .btn.ghost { background: transparent; color: #fff; }
+    .btn:hover { opacity: .9; }
+
+    /* ---------- Sticky in-page nav ---------- */
+    .page-nav {
+        position: sticky; top: 0; z-index: 10;
+        background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .page-nav ul {
+        list-style: none; margin: 0 auto; padding: 0 24px; max-width: var(--max-width);
+        display: flex; gap: 4px; overflow-x: auto;
+    }
+    .page-nav a {
+        display: block; padding: 14px 12px; white-space: nowrap;
+        color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: .95rem;
+        border-bottom: 3px solid transparent;
+    }
+    .page-nav a:hover, .page-nav a.active { color: var(--brand); border-bottom-color: var(--brand); }
+
+    /* ---------- Cards ---------- */
+    .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 24px; }
+    .card {
+        background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+        padding: 24px; transition: box-shadow .15s, transform .15s;
+    }
+    a.card { color: inherit; text-decoration: none; display: block; }
+    a.card:hover { box-shadow: 0 6px 18px rgba(0,0,0,.08); transform: translateY(-2px); }
+    .card .icon {
+        width: 40px; height: 40px; border-radius: 10px; margin-bottom: 14px;
+        background: var(--brand-light); color: var(--brand);
+        display: grid; place-items: center; font-size: 1.3rem;
+    }
+    .card p { color: var(--text-muted); margin: 0; }
+
+    /* ---------- Stats ---------- */
+    .stats { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: 24px; }
+    .stat { border-left: 4px solid var(--brand); padding: 4px 0 4px 16px; }
+    .stat .num { font-size: 2rem; font-weight: 700; color: var(--brand-dark); line-height: 1.1; }
+    .stat .label { color: var(--text-muted); font-size: .95rem; }
+
+    /* ---------- Tabs ---------- */
+    .tabs { margin-top: 24px; }
+    .tablist { display: flex; gap: 4px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+    .tablist button {
+        font: inherit; font-weight: 600; color: var(--text-muted);
+        background: none; border: 0; border-bottom: 3px solid transparent;
+        padding: 10px 16px; cursor: pointer; white-space: nowrap;
+    }
+    .tablist button[aria-selected="true"] { color: var(--brand); border-bottom-color: var(--brand); }
+    .tabpanel { padding: 24px 0 0; }
+
+    /* ---------- Timeline ---------- */
+    .timeline { list-style: none; margin: 24px 0 0; padding: 0 0 0 24px; border-left: 2px solid var(--border); }
+    .timeline li { position: relative; padding: 0 0 28px 16px; }
+    .timeline li::before {
+        content: ""; position: absolute; left: -33px; top: 4px;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: var(--bg); border: 3px solid var(--border);
+    }
+    .timeline li.done::before    { background: var(--brand); border-color: var(--brand); }
+    .timeline li.current::before { border-color: var(--brand); }
+    .timeline .when { font-size: .85rem; font-weight: 600; color: var(--brand); text-transform: uppercase; letter-spacing: .04em; }
+    .badge {
+        display: inline-block; font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+        background: var(--brand-light); color: var(--brand); margin-left: 6px; vertical-align: middle;
+    }
+
+    /* ---------- FAQ (native <details>, no JS) ---------- */
+    .faq { margin-top: 24px; max-width: 80ch; }
+    .faq details { border-bottom: 1px solid var(--border); }
+    .faq summary {
+        cursor: pointer; list-style: none; padding: 16px 32px 16px 0; font-weight: 600; position: relative;
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after {
+        content: "+"; position: absolute; right: 4px; top: 12px; font-size: 1.4rem; color: var(--brand);
+    }
+    .faq details[open] summary::after { content: "\2212"; }
+    .faq details p { color: var(--text-muted); padding-bottom: 8px; }
+
+    /* ---------- Contact ---------- */
+    .contact { display: flex; align-items: center; gap: 14px; }
+    .avatar {
+        width: 48px; height: 48px; border-radius: 50%; flex: none;
+        background: var(--brand); color: #fff; display: grid; place-items: center; font-weight: 700;
+    }
+    .contact strong { display: block; }
+    .contact span { color: var(--text-muted); font-size: .9rem; }
+
+    /* ---------- Callout ---------- */
+    .callout {
+        background: var(--brand-light); border-left: 4px solid var(--brand);
+        border-radius: 0 var(--radius) var(--radius) 0; padding: 16px 20px; margin-top: 24px;
+    }
+
+    footer { padding: 32px 0; color: var(--text-muted); font-size: .9rem; border-top: 1px solid var(--border); }
+
+    @media (max-width: 600px) {
+        .container { padding: 0 16px; }
+        section { padding: 40px 0; }
+        .hero { padding: 48px 0 40px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        * { transition: none !important; }
+    }
+</style>
+</head>
+<body>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+    <div class="container">
+        <span class="eyebrow">Department / Category</span>
+        <h1>Page title goes here</h1>
+        <p>A short sentence or two explaining what this page is for and who it's for.</p>
+        <a class="btn" href="#getting-started">Get started</a>
+        <a class="btn ghost" href="#faq">Read the FAQ</a>
+    </div>
+</header>
+
+<!-- ===================== IN-PAGE NAV ===================== -->
+<nav class="page-nav" aria-label="On this page">
+    <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#getting-started">Getting started</a></li>
+        <li><a href="#roadmap">Roadmap</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+</nav>
+
+<main>
+    <!-- ===================== OVERVIEW ===================== -->
+    <section id="overview">
+        <div class="container">
+            <h2>Overview</h2>
+            <p class="lead">Introductory paragraph. Explain the purpose, the background, and what readers will find below.</p>
+
+            <div class="stats">
+                <div class="stat"><div class="num">120</div><div class="label">Key metric one</div></div>
+                <div class="stat"><div class="num">98%</div><div class="label">Key metric two</div></div>
+                <div class="stat"><div class="num">4</div><div class="label">Key metric three</div></div>
+                <div class="stat"><div class="num">Q1</div><div class="label">Key metric four</div></div>
+            </div>
+
+            <!-- Quick-link cards. Use same-tenant URLs (other domains need admin allow-listing). -->
+            <div class="grid">
+                <a class="card" href="#">
+                    <div class="icon" aria-hidden="true">&#128196;</div>
+                    <h3>Documents</h3>
+                    <p>Link to a document library or important file.</p>
+                </a>
+                <a class="card" href="#">
+                    <div class="icon" aria-hidden="true">&#128197;</div>
+                    <h3>Calendar</h3>
+                    <p>Upcoming events, deadlines or meetings.</p>
+                </a>
+                <a class="card" href="#">
+                    <div class="icon" aria-hidden="true">&#128172;</div>
+                    <h3>Teams channel</h3>
+                    <p>Where to ask questions and get help.</p>
+                </a>
+                <a class="card" href="#">
+                    <div class="icon" aria-hidden="true">&#128736;</div>
+                    <h3>Request form</h3>
+                    <p>Submit a request or report an issue.</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== GETTING STARTED (TABS) ===================== -->
+    <section id="getting-started" class="alt">
+        <div class="container">
+            <h2>Getting started</h2>
+            <p class="lead">Use tabs to keep audience-specific or step-by-step content compact.</p>
+
+            <div class="tabs" data-tabs>
+                <div class="tablist" role="tablist" aria-label="Getting started">
+                    <button role="tab" id="tab-1" aria-controls="panel-1">For employees</button>
+                    <button role="tab" id="tab-2" aria-controls="panel-2">For managers</button>
+                    <button role="tab" id="tab-3" aria-controls="panel-3">For IT</button>
+                </div>
+                <div class="tabpanel" role="tabpanel" id="panel-1" aria-labelledby="tab-1" tabindex="0">
+                    <h3>Step-by-step for employees</h3>
+                    <ol>
+                        <li>First step.</li>
+                        <li>Second step.</li>
+                        <li>Third step.</li>
+                    </ol>
+                </div>
+                <div class="tabpanel" role="tabpanel" id="panel-2" aria-labelledby="tab-2" tabindex="0">
+                    <h3>What managers need to know</h3>
+                    <p>Content for managers.</p>
+                </div>
+                <div class="tabpanel" role="tabpanel" id="panel-3" aria-labelledby="tab-3" tabindex="0">
+                    <h3>Technical details</h3>
+                    <p>Content for IT.</p>
+                </div>
+            </div>
+
+            <div class="callout">
+                <strong>Note:</strong> Use a callout for important information, deadlines or warnings.
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== ROADMAP ===================== -->
+    <section id="roadmap">
+        <div class="container">
+            <h2>Roadmap</h2>
+            <p class="lead">Mark items as <code>done</code> or <code>current</code> with a class on the list item.</p>
+            <ol class="timeline">
+                <li class="done">
+                    <div class="when">January</div>
+                    <h3>Phase 1: Planning <span class="badge">Done</span></h3>
+                    <p>Short description of the phase.</p>
+                </li>
+                <li class="current">
+                    <div class="when">March</div>
+                    <h3>Phase 2: Pilot <span class="badge">In progress</span></h3>
+                    <p>Short description of the phase.</p>
+                </li>
+                <li>
+                    <div class="when">June</div>
+                    <h3>Phase 3: Rollout</h3>
+                    <p>Short description of the phase.</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ===================== FAQ ===================== -->
+    <section id="faq" class="alt">
+        <div class="container">
+            <h2>Frequently asked questions</h2>
+            <div class="faq">
+                <details>
+                    <summary>Question one?</summary>
+                    <p>Answer to question one.</p>
+                </details>
+                <details>
+                    <summary>Question two?</summary>
+                    <p>Answer to question two.</p>
+                </details>
+                <details>
+                    <summary>Question three?</summary>
+                    <p>Answer to question three.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== CONTACT ===================== -->
+    <section id="contact">
+        <div class="container">
+            <h2>Contact</h2>
+            <div class="grid">
+                <div class="card contact">
+                    <div class="avatar" aria-hidden="true">AB</div>
+                    <div><strong>Name Surname</strong><span>Role / responsibility</span></div>
+                </div>
+                <div class="card contact">
+                    <div class="avatar" aria-hidden="true">CD</div>
+                    <div><strong>Name Surname</strong><span>Role / responsibility</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="container">
+        Page owner: Department name &middot; Last reviewed: <time>YYYY-MM-DD</time>
+    </div>
+</footer>
+
+<script>
+    // Tabs: in-memory only (the sandbox blocks localStorage)
+    document.querySelectorAll("[data-tabs]").forEach(function (root) {
+        var tabs   = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
+        var panels = tabs.map(function (t) { return document.getElementById(t.getAttribute("aria-controls")); });
+
+        function select(i, focus) {
+            tabs.forEach(function (t, j) {
+                var on = i === j;
+                t.setAttribute("aria-selected", on);
+                t.tabIndex = on ? 0 : -1;
+                panels[j].hidden = !on;
+            });
+            if (focus) tabs[i].focus();
+        }
+
+        tabs.forEach(function (t, i) {
+            t.addEventListener("click", function () { select(i); });
+            t.addEventListener("keydown", function (e) {
+                var n = tabs.length;
+                if (e.key === "ArrowRight") select((i + 1) % n, true);
+                else if (e.key === "ArrowLeft") select((i - 1 + n) % n, true);
+                else if (e.key === "Home") select(0, true);
+                else if (e.key === "End") select(n - 1, true);
+                else return;
+                e.preventDefault();
+            });
+        });
+        select(0);
+    });
+
+    // Highlight the current section in the sticky nav
+    (function () {
+        var links = document.querySelectorAll(".page-nav a");
+        if (!("IntersectionObserver" in window) || !links.length) return;
+        var map = {};
+        links.forEach(function (a) { map[a.getAttribute("href").slice(1)] = a; });
+        var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                links.forEach(function (a) { a.classList.remove("active"); });
+                if (map[e.target.id]) map[e.target.id].classList.add("active");
+            });
+        }, { rootMargin: "-40% 0px -55% 0px" });
+        Object.keys(map).forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) obs.observe(el);
+        });
+    })();
+</script>
+</body>
+</html>
